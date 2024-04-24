@@ -5,6 +5,7 @@ import numpy as np
 import math
 import os
 import array
+from numba import jit
 
 #---------------------------------------------------------------------#
 
@@ -508,5 +509,29 @@ class multiLevelPercolation:
 			os.system('rm -rf Percolation*.txt')
 		
 		print('Done..')
+	
+	@staticmethod
+	@jit(nopython=True)	
+	def getIndividualThresholds(data, _structValuedGrid):
 		
+		maxVal = _structValuedGrid.max()
 		
+		data = data.ravel()
+		_structValuedGrid = _structValuedGrid.ravel()
+		
+		minThreshVals = np.zeros(maxVal, dtype = np.float64)
+		
+		for i in range(1, maxVal+1):
+			minThreshVal = 0
+			
+			for j in range(len(_structValuedGrid)):
+				if _structValuedGrid[j] == i:
+					if minThreshVal == 0:
+						minThreshVal += data[j]
+					else:
+						if data[j] < minThreshVal:
+							minThreshVal = data[j]
+			
+			minThreshVals[i-1] = minThreshVal
+		
+		return minThreshVals
